@@ -1,0 +1,33 @@
+Sub/Import version 0.5
+======================
+
+Ever wanted to require() a file just for it's subroutines but had to end up
+copying and pasting because the file executed code? If the answer to the
+previous question was /^yes!?/i then this is the module for you! It will
+cleanly extract subroutines from a given file and import them into the
+current package.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+	Carp
+	IO::File
+	Data::Dumper
+	Regexp::Common
+	Text::Balanced
+
+COPYRIGHT AND LICENCE
+
+Copyright (c) 2002, Dan Brook. All Rights Reserved. This module is free
+software. It may be used, redistributed and/or modified under the same terms
+as Perl itself.

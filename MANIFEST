@@ -1,0 +1,9 @@
+Import.pm
+Makefile.PL
+MANIFEST
+test.pl
+ChangeLog
+t/somesubs.pl
+t/02methods.t
+t/01simple.t
+README
