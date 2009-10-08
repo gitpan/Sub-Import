@@ -1,13 +1,13 @@
 {
    "resources" : {
-      "repository" : "origin"
+      "repository" : "http://github.com/rjbs/sub-import/tree"
    },
    "meta-spec" : {
       "version" : 1.4,
       "url" : "http://module-build.sourceforge.net/META-spec-v1.4.html"
    },
    "generated_by" : "Dist::Zilla version 1.092680",
-   "version" : "0.092800",
+   "version" : "0.092801",
    "name" : "Sub-Import",
    "author" : [
       "Ricardo Signes <rjbs@cpan.org>"

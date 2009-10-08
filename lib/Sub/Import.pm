@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Sub::Import;
-our $VERSION = '0.092800';
+our $VERSION = '0.092801';
 
 
 # ABSTRACT: import routines from most anything using Sub::Exporter
@@ -10,45 +10,48 @@ our $VERSION = '0.092800';
 use B qw(svref_2object);
 use Carp ();
 use Exporter ();
-use Params::Util qw(_CLASS);
+use Params::Util qw(_CLASS _CLASSISA);
+use Sub::Exporter ();
 
-my %methods;
 
 sub import {
   my ($self, $target, @args) = @_;
 
-  my $import = $self->get_import($target);
+  my $import = $self->_get_import($target);
 
-  $target->$import(@args);
+  @_ = ($target, @args);
+  goto &$import;
 }
 
 sub unimport {
   my ($self, $target, @args) = @_;
 
-  my $unimport = $self->get_unimport($target);
+  my $unimport = $self->_get_unimport($target);
 
-  $target->$unimport(@args);
+  @_ = ($target, @args);
+  goto &$unimport;
 }
 
-sub get_unimport {
+sub _get_unimport {
   my ($self, $target) = @_;
 
-  $self->get_methods($target)->{unimport};
+  $self->_get_methods($target)->{unimport};
 }
 
-sub get_import {
+sub _get_import {
   my ($self, $target) = @_;
 
-  $self->get_methods($target)->{import};
+  $self->_get_methods($target)->{import};
 }
 
-sub get_methods {
+my %GENERATED_METHODS;
+sub _get_methods {
   my ($self, $target) = @_;
 
-  $methods{$target} ||= $self->create_methods($target);
+  $GENERATED_METHODS{$target} ||= $self->_create_methods($target);
 }
 
-sub require_class {
+sub _require_class {
   my ($self, $class) = @_;
 
   Carp::croak("invalid package name: $class") unless _CLASS($class);
@@ -63,13 +66,15 @@ sub _is_sexy {
   my ($self, $class) = @_;
 
   local $@;
-  eval {
-    my $obj = svref_2object( Foo->can('import') );
+  my $isa;
+  my $ok = eval {
+    my $obj = svref_2object( $class->can('import') );
     my $importer_pkg = $obj->START->stashpv;
-    return _CLASSISA($importer_pkg, 'Sub::Exporter');
+    $isa = _CLASSISA($importer_pkg, 'Sub::Exporter');
+    1;
   };
 
-  return;
+  return $isa;
 }
 
 my $EXPORTER_IMPORT;
@@ -86,86 +91,68 @@ sub _is_exporterrific {
   return $class_import == $EXPORTER_IMPORT;
 }
 
-sub create_methods {
+sub _create_methods {
   my ($self, $target) = @_;
 
-  $self->require_class($target);
+  $self->_require_class($target);
 
   if ($self->_is_sexy($target)) {
     return {
-      import   => "import",
-      unimport => "unimport",
+      import   => $target->can("import"),
+      unimport => $target->can("unimport"),
     };
   } elsif ($self->_is_exporterrific($target)) {
-    return $self->create_methods_exporter($target);
+    return $self->_create_methods_exporter($target);
   } else {
-    return $self->create_methods_fallback($target);
+    return $self->_create_methods_fallback($target);
   }
 }
 
-sub create_methods_exporter {
+sub __filter_subs {
+  my ($self, $exports) = @_;
+
+  @$exports = map { s/\A&//; $_ } grep { /\A[&_a-z]/ } @$exports;
+}
+
+sub _create_methods_exporter {
   my ($self, $target) = @_;
 
   no strict 'refs';
 
-  my @ok      = @{ $target . "::EXPORT_OK" };
-  my @default = @{ $target . "::EXPORT" };
+  my @ok      = @{ $target . "::EXPORT_OK"  };
+  my @default = @{ $target . "::EXPORT"     };
+  my %groups  = %{ $target . "::EXPORT_TAG" };
+
+  $self->__filter_subs($_) for (\@ok, \@default, values %groups);
 
   my @all = do {
     my %seen;
-    grep { !$seen{$_}++ } @ok, @default;
+    grep { ! $seen{$_}++ } @ok, @default;
   };
 
-  my $import = Sub::Exporter::build_exporter(
-    {
-      exports => \@all,
-      groups  => { default => \@default, }
+  my $import = Sub::Exporter::build_exporter({
+    exports => \@all,
+    groups  => {
+      %groups,
+      default => \@default,
     }
-  );
+  });
 
   return {
     import   => $import,
-    unimport => sub { },
+    unimport => sub { die "unimport not handled for Exporter via Sub::Import" },
   };
 }
 
-sub create_methods_fallback {
+sub _create_methods_fallback {
   my ($self, @target) = @_;
 
-  return {
-    import => do {
-
-      package Sub::Importer::Scratch;
-our $VERSION = '0.092800';
-
-
-
-      sub {
-        my ($class, @import) = @_;
-
-        my $actual_import = caller();
-
-        # parse @import as S'Ex directives
-        # wind up with the low level import list
-        # generators are obviously not really possible,
-
-        my @actual_import = @import;
-
-        $class->import(@actual_import);
-
-        no strict 'refs';
-
-        my %imported = %{ __PACKAGE__ . "::" };
-        %{ __PACKAGE__ . "::" } = ();
-
-        wrap_and_shit(\%imported, @import, into => $actual_import);
-      }
-    },
-
-    unimport => sub { },
-  };
+  Carp::confess(
+    "Sub::Import only handles Sub::Exporter and Exporter-based import methods"
+  );
 }
 
+1;
 
 __END__
 
@@ -177,7 +164,39 @@ Sub::Import - import routines from most anything using Sub::Exporter
 
 =head1 VERSION
 
-version 0.092800
+version 0.092801
+
+=head1 SYNOPSIS
+
+  use Sub::Import 'Some::Library' => (
+    some_routine  => { -as => 'some_other_name' },
+    other_routine => undef,
+  );
+
+=head1 DESCRIPTION
+
+Sub::Import is the companion to Sub::Exporter.  You can use Sub::Import to get
+Sub::Exporter-like import semantics, even if the library you're importing from
+used Exporter.pm.
+
+The synopsis above should say it all.  Where you would usually say:
+
+  use Some::Library qw(foo bar baz);
+
+...to get Exporter.pm semantics, you can now get Sub::Exporter semantics with:
+
+  use Sub::Import 'Some::Library' => qw(foo bar baz);
+
+=head1 WARNINGS AND LIMITATIONS
+
+While you can rename imports, there is no way to customize them, because they
+are not being built by generators.  At present, extra arguments for each import
+will be thrown away.  In the future, they may become a fatal error.
+
+Non-subroutine imports will not be importable via this mechanism.
+
+The regex-like import features of Exporter.pm will be unavailable.  (Will
+anyone miss them?)
 
 =head1 AUTHOR
 

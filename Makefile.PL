@@ -9,7 +9,7 @@ WriteMakefile(
   NAME      => 'Sub::Import',
   AUTHOR    => 'Ricardo\ Signes\ \<rjbs\@cpan\.org\>',
   ABSTRACT  => 'import\ routines\ from\ most\ anything\ using\ Sub\:\:Exporter',
-  VERSION   => '0.092800',
+  VERSION   => '0.092801',
   EXE_FILES => [ qw() ],
   (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
   PREREQ_PM    => {

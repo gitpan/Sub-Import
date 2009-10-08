@@ -5,6 +5,9 @@ Makefile.PL
 README
 dist.ini
 lib/Sub/Import.pm
-t/compile.t
+t/import-ex.t
+t/import-se.t
+t/lib/Ex.pm
+t/lib/SE.pm
 t/release-pod-coverage.t
 t/release-pod-syntax.t
