@@ -1,9 +1,10 @@
-Import.pm
-Makefile.PL
+LICENSE
 MANIFEST
-test.pl
-ChangeLog
-t/somesubs.pl
-t/02methods.t
-t/01simple.t
+META.json
+Makefile.PL
 README
+dist.ini
+lib/Sub/Import.pm
+t/compile.t
+t/release-pod-coverage.t
+t/release-pod-syntax.t
