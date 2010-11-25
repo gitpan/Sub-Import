@@ -1,12 +1,13 @@
 
 
-This archive contains the distribution Sub-Import, version
-0.092801:
+This archive contains the distribution Sub-Import,
+version 1.000:
 
   import routines from most anything using Sub::Exporter
 
-This software is copyright (c) 2009 by Ricardo Signes.
+This software is copyright (c) 2010 by Ricardo Signes.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
 

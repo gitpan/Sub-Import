@@ -1,6 +1,8 @@
+Changes
 LICENSE
 MANIFEST
 META.json
+META.yml
 Makefile.PL
 README
 dist.ini
@@ -9,5 +11,4 @@ t/import-ex.t
 t/import-se.t
 t/lib/Ex.pm
 t/lib/SE.pm
-t/release-pod-coverage.t
 t/release-pod-syntax.t
