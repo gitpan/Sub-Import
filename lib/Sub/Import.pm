@@ -2,8 +2,8 @@ use strict;
 use warnings;
 
 package Sub::Import;
-BEGIN {
-  $Sub::Import::VERSION = '1.000';
+{
+  $Sub::Import::VERSION = '1.001';
 }
 # ABSTRACT: import routines from most anything using Sub::Exporter
 
@@ -155,6 +155,7 @@ sub _create_methods_fallback {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -163,7 +164,7 @@ Sub::Import - import routines from most anything using Sub::Exporter
 
 =head1 VERSION
 
-version 1.000
+version 1.001
 
 =head1 SYNOPSIS
 
@@ -203,10 +204,9 @@ Ricardo Signes <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Ricardo Signes.
+This software is copyright (c) 2013 by Ricardo Signes.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
